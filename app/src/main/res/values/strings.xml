@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Lab2</string>
+
+    <string name="preferenceURLHint">RSS Feed URL</string>
+    <string name="preferenceFreqTitle">Refresh Frequency</string>
+    <string name="preferenceLimitTitle">Limit Items</string>
+
+
+    <string name="unitMinutes">minutes</string>
+    <string name="unitItems">items</string>
+
+    <string name="buttonTitleBack">back</string>
+    <string name="buttonTitlePreferences">preferences</string>
+
+    <string name="readmore">read more</string>
+</resources>
