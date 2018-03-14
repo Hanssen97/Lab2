@@ -35,7 +35,7 @@ public class update extends Service {
 
     int     refreshFrequency = 0;
     String  rssURL           = "";
-    String update           = "";
+    String update            = "";
 
 
 
@@ -57,7 +57,7 @@ public class update extends Service {
             notificationChannel.setDescription("Channel description");
             notificationChannel.enableLights(true);
             notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[]{0, 100, 20, 100, 20, 100, 20, 100});
+            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
             notificationChannel.enableVibration(true);
             nManager.createNotificationChannel(notificationChannel);
         }
@@ -76,8 +76,6 @@ public class update extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId){
-        Log.d("SERVICE", "Started");
-
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -109,6 +107,16 @@ public class update extends Service {
             @Override
             public void onResponse(String res) {
                 update = res;
+
+                Log.d("SERVICE", "Updated content");
+
+                if (dataDifference()) {
+                    notifyNewContent();
+                }
+
+                Log.d("SERVICE CONTENT UPDATE", update);
+
+                savePreferences(update);
             }
         }, new Response.ErrorListener() {
             @Override
@@ -132,20 +140,6 @@ public class update extends Service {
     public void refresh() {
         getUserPreferences();
         getRSSData(rssURL);
-        Log.d("SERVICE", "Updated content");
-
-        if (dataDifference()) {
-            nBuilder.setSmallIcon(R.drawable.ic_launcher_foreground);
-            nBuilder.setContentTitle("New Stories!");
-            nBuilder.setContentText("RSS Feeder");
-            nBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
-            nBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
-                    new Intent(this, main.class), PendingIntent.FLAG_UPDATE_CURRENT));
-
-            nManager.notify(NEW_CONTENT_NOTIFICATION_ID, nBuilder.build());
-        }
-
-        savePreferences(update);
     }
 
 
@@ -153,13 +147,19 @@ public class update extends Service {
         SharedPreferences sharedPref = getSharedPreferences("preferences", MODE_PRIVATE);
         String current = sharedPref.getString("xml", "");
 
-        if (!current.equals(update)) {
-            Log.d("NIGGER", "IKKE LIK!");
-        } else {
-            Log.d("NIGGER", "LIK!!!!!");
-        }
-
         return !current.equals(update);
+    }
+
+
+    private void notifyNewContent() {
+        nBuilder.setSmallIcon(R.drawable.ic_launcher_foreground);
+        nBuilder.setContentTitle("New Stories!");
+        nBuilder.setContentText("RSS Feeder");
+        nBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        nBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
+                new Intent(this, main.class), PendingIntent.FLAG_UPDATE_CURRENT));
+
+        nManager.notify(NEW_CONTENT_NOTIFICATION_ID, nBuilder.build());
     }
 
 }

@@ -40,6 +40,7 @@ public class preferences extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 savePreferences();
+                stopService(new Intent(preferences.this, update.class));
                 startActivity(new Intent(preferences.this, main.class));
             }
         });

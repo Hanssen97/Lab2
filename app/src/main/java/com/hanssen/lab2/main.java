@@ -20,6 +20,7 @@ import org.json.XML;
 import android.util.Log;
 import android.widget.ListView;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 
 public class main extends AppCompatActivity {
@@ -39,16 +40,34 @@ public class main extends AppCompatActivity {
             startService(new Intent(this, update.class));
         }
 
-        getUserPreferences();
-
-        if (!xml.isEmpty()) {
-            itemList = getItemList(xmlToJSON(xml));
-            updateList();
-        }
+        getData();
 
         addListenerOnPreferencesButton();
+    }
 
-        addListenerOnItemList();
+
+    private void getData() {
+        new java.util.Timer().schedule(
+                new java.util.TimerTask() {
+                    @Override
+                    public void run() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                getUserPreferences();
+
+                                if (!xml.isEmpty()) {
+                                    itemList = getItemList(xmlToJSON(xml));
+                                    updateList();
+                                }
+
+                                addListenerOnItemList();
+                            }
+                        });
+                    }
+                },
+                500
+        );
     }
 
 
