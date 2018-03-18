@@ -106,7 +106,7 @@ public class main extends AppCompatActivity {
         try {
             object = XML.toJSONObject(xml);
         } catch (JSONException e) {
-            Log.d("Error", e.getMessage());
+            Log.e("Error", e.getMessage());
         }
 
         return object;
@@ -120,7 +120,7 @@ public class main extends AppCompatActivity {
         try {
             list = obj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
         } catch (JSONException e) {
-            Log.d("Error", e.getMessage());
+            Log.e("Error", e.getMessage());
         }
 
         return list;

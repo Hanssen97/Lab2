@@ -36,7 +36,7 @@ public class update extends Service {
 
 
     public void onCreate() {
-        Log.d("SERVICE", "Created");
+        // Log.d("SERVICE", "Created");
 
         // Initialize new queue.
         if (queue == null) {
@@ -79,7 +79,7 @@ public class update extends Service {
 
     @Override
     public void onDestroy() {
-        Log.d("SERVICE", "Destroyed");
+        //Log.d("SERVICE", "Destroyed");
         super.onDestroy();
     }
 
@@ -107,7 +107,7 @@ public class update extends Service {
             public void onResponse(String res) {
                 update = res;
 
-                Log.d("SERVICE", "Updated content");
+                // Log.d("SERVICE", "Updated content");
 
                 // Checks if the new data is different from old cached data.
                 if (dataDifference()) {
@@ -160,6 +160,7 @@ public class update extends Service {
         nBuilder.setContentTitle("New Stories!");
         nBuilder.setContentText("RSS Feeder");
         nBuilder.setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        nBuilder.setAutoCancel(true);
         nBuilder.setContentIntent(PendingIntent.getActivity(this, 0,
                 new Intent(this, main.class), PendingIntent.FLAG_UPDATE_CURRENT));
 
