@@ -11,7 +11,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -24,49 +23,47 @@ import com.android.volley.toolbox.Volley;
 public class update extends Service {
 
     private static final int    NEW_CONTENT_NOTIFICATION_ID         = 0;
-    private static final String NEW_CONTENT_NOTIFICATION_CHANNEL_ID = "RSS Feed";
+    private static final String NEW_CONTENT_NOTIFICATION_CHANNEL_ID = "RSS Feeder";
 
     NotificationCompat.Builder nBuilder = null;
     NotificationManager        nManager = null;
-
-
 
     RequestQueue queue       = null;
 
     int     refreshFrequency = 0;
     String  rssURL           = "";
-    String update            = "";
-
-
+    String  update           = "";
 
 
     public void onCreate() {
         Log.d("SERVICE", "Created");
 
+        // Initialize new queue.
         if (queue == null) {
             queue = Volley.newRequestQueue(this);
         }
-
+        // Notification setup
         nBuilder = new NotificationCompat.Builder(this, NEW_CONTENT_NOTIFICATION_CHANNEL_ID);
         nManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 
-
+        // For specific SDK versions
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationChannel notificationChannel = new NotificationChannel(NEW_CONTENT_NOTIFICATION_CHANNEL_ID, "RSS Feed", NotificationManager.IMPORTANCE_DEFAULT);
+            NotificationChannel notificationChannel = new NotificationChannel(NEW_CONTENT_NOTIFICATION_CHANNEL_ID, "RSS Feeder", NotificationManager.IMPORTANCE_DEFAULT);
 
             notificationChannel.setDescription("Channel description");
             notificationChannel.enableLights(true);
-            notificationChannel.setLightColor(Color.RED);
-            notificationChannel.setVibrationPattern(new long[]{0, 1000, 500, 1000});
+            notificationChannel.setLightColor(Color.BLUE);
+            notificationChannel.setVibrationPattern(new long[]{0, 100, 0});
             notificationChannel.enableVibration(true);
             nManager.createNotificationChannel(notificationChannel);
         }
 
-
+        // Uses handler for cron job.
         final Handler handler = new Handler();
 
         handler.postDelayed(new Runnable(){
             public void run() {
+                // updates data in interval (refreshFrequency minutes).
                 refresh();
                 handler.postDelayed(this, 60000 * refreshFrequency);
             }
@@ -94,6 +91,7 @@ public class update extends Service {
 
 
     private void getUserPreferences() {
+        // Gets data from cache.
         SharedPreferences sharedPref = getSharedPreferences("preferences", MODE_PRIVATE);
 
         rssURL            = sharedPref.getString("rssURL", "");
@@ -103,6 +101,7 @@ public class update extends Service {
 
 
     private void getRSSData(String url) {
+        // Retrieves RSS data from url.
         StringRequest req = new StringRequest(Request.Method.GET, url, new Response.Listener<String>() {
             @Override
             public void onResponse(String res) {
@@ -110,12 +109,12 @@ public class update extends Service {
 
                 Log.d("SERVICE", "Updated content");
 
+                // Checks if the new data is different from old cached data.
                 if (dataDifference()) {
                     notifyNewContent();
                 }
 
-                Log.d("SERVICE CONTENT UPDATE", update);
-
+                // Saves new data to cache.
                 savePreferences(update);
             }
         }, new Response.ErrorListener() {
@@ -125,11 +124,13 @@ public class update extends Service {
             }
         });
 
+        // Adds request to queue.
         queue.add(req);
     }
 
 
     private void savePreferences(String xml) {
+        // Saves xml to cache.
         SharedPreferences sharedPref = getSharedPreferences("preferences",0);
         SharedPreferences.Editor prefEditor = sharedPref.edit();
         prefEditor.putString("xml", xml);
@@ -144,14 +145,17 @@ public class update extends Service {
 
 
     private boolean dataDifference() {
+        // Checks difference in cache xml and global xml.
         SharedPreferences sharedPref = getSharedPreferences("preferences", MODE_PRIVATE);
-        String current = sharedPref.getString("xml", "");
+        String current = sharedPref.getString("xml", "").replaceAll("\\s+","");
+        String compare = update.replaceAll("\\s+","");
 
-        return !current.equals(update);
+        return !current.equals(compare);
     }
 
 
     private void notifyNewContent() {
+        // Notifies the user with new content.
         nBuilder.setSmallIcon(R.drawable.ic_launcher_foreground);
         nBuilder.setContentTitle("New Stories!");
         nBuilder.setContentText("RSS Feeder");
@@ -161,5 +165,4 @@ public class update extends Service {
 
         nManager.notify(NEW_CONTENT_NOTIFICATION_ID, nBuilder.build());
     }
-
 }

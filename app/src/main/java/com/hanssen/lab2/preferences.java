@@ -2,7 +2,6 @@ package com.hanssen.lab2;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.support.design.widget.TextInputEditText;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,12 +17,17 @@ public class preferences extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_preferences);
 
+        setup();
+    }
+
+    private void setup() {
         getUserPreferences();
         addListenerOnBackButton();
     }
 
 
     private void setupNumberPicker(NumberPicker limiter, int minValue, int maxValue, int value) {
+        // Sets up values for a NumberPicker class.
         limiter.setMinValue(minValue);
         limiter.setMaxValue(maxValue);
         limiter.setValue(value);
@@ -36,6 +40,8 @@ public class preferences extends AppCompatActivity {
 
 
     private void addListenerOnBackButton() {
+        // Back button saves the preferences, restarts the background service with new data and
+        //  starts the main activity.
         Button button = findViewById(R.id.goBack);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -48,6 +54,7 @@ public class preferences extends AppCompatActivity {
 
 
     private void savePreferences() {
+        // Saves following data to cache.
         EditText     rssURL  = findViewById(R.id.rssURL);
         NumberPicker items   = findViewById(R.id.limiterItems);
         NumberPicker refresh = findViewById(R.id.limiterRefresh);
@@ -63,6 +70,7 @@ public class preferences extends AppCompatActivity {
 
 
     private void getUserPreferences() {
+        // Gets following data to cache.
         SharedPreferences sharedPref = getSharedPreferences("preferences", MODE_PRIVATE);
         String rssURL  = sharedPref.getString("rssURL", "");
         int items   = sharedPref.getInt("items", 0);

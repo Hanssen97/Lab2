@@ -19,6 +19,10 @@ public class content extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_content);
 
+        setup();
+    }
+
+    private void setup() {
         getIntentData();
         setContent();
 
@@ -28,6 +32,7 @@ public class content extends AppCompatActivity {
 
 
     private void getIntentData() {
+        // Initialises global data with intent data.
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
             title       = extras.getString("title");
@@ -38,6 +43,7 @@ public class content extends AppCompatActivity {
 
 
     private void setContent() {
+        // Updates widget data.
         TextView titleView       = findViewById(R.id.title);
         TextView descriptionView = findViewById(R.id.description);
 
@@ -48,6 +54,7 @@ public class content extends AppCompatActivity {
 
 
     private void addListenerOnBackButton() {
+        // Open activity (Main) when back button is clicked.
         Button button = findViewById(R.id.goBack);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -57,6 +64,7 @@ public class content extends AppCompatActivity {
         });
     }
     private void addListenerOnReadMoreButton() {
+        // Open activity (Main) when back button is clicked.
         TextView more = findViewById(R.id.link);
         more.setOnClickListener(new View.OnClickListener() {
             @Override

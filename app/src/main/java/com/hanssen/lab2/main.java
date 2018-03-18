@@ -20,15 +20,13 @@ import org.json.XML;
 import android.util.Log;
 import android.widget.ListView;
 import java.util.ArrayList;
-import java.util.concurrent.TimeUnit;
 
 
 public class main extends AppCompatActivity {
 
-    JSONArray itemList  = null;
-
-    int     itemLimit = 0;
-    String  xml       = "";
+    JSONArray   itemList  = null;
+    int         itemLimit = 0;
+    String      xml       = "";
 
 
     @Override
@@ -36,42 +34,53 @@ public class main extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setup();
+    }
+
+    private void setup() {
+        // Checks if background service is running, start it if it don't.
         if (!isMyServiceRunning()){
             startService(new Intent(this, update.class));
         }
 
         getData();
-
         addListenerOnPreferencesButton();
     }
 
 
     private void getData() {
+        /*
+            The code below introduces a delay (500ms) before fetching the XML data provided
+            by the background service (async).
+         */
         new java.util.Timer().schedule(
-                new java.util.TimerTask() {
-                    @Override
-                    public void run() {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                getUserPreferences();
+            new java.util.TimerTask() {
+                @Override
+                public void run() {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            getUserPreferences();
 
-                                if (!xml.isEmpty()) {
-                                    itemList = getItemList(xmlToJSON(xml));
-                                    updateList();
-                                }
-
-                                addListenerOnItemList();
+                            // Checks if there is data to parse
+                            if (!xml.isEmpty()) {
+                                itemList = getItemList(xmlToJSON(xml));
+                                updateList();
                             }
-                        });
-                    }
-                },
-                500
+
+                            // Add xml data to list.
+                            addListenerOnItemList();
+                        }
+                    });
+                }
+            },
+            500
         );
     }
 
 
     private void addListenerOnPreferencesButton() {
+        // Starts preferences activity when button is pressed.
         Button button = findViewById(R.id.gotoPreferences);
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -82,6 +91,7 @@ public class main extends AppCompatActivity {
 
 
     private void getUserPreferences() {
+        // Retrieves xml and item limit from cache.
         SharedPreferences sharedPref = getSharedPreferences("preferences", MODE_PRIVATE);
 
         xml       = sharedPref.getString("xml", "");
@@ -92,6 +102,7 @@ public class main extends AppCompatActivity {
     private JSONObject xmlToJSON(String xml) {
         JSONObject object = null;
 
+        // Parses and returns json from xml.
         try {
             object = XML.toJSONObject(xml);
         } catch (JSONException e) {
@@ -105,6 +116,7 @@ public class main extends AppCompatActivity {
     private JSONArray getItemList(JSONObject obj) {
         JSONArray list = null;
 
+        // Gets the items from a rss json object and returns an array with the items.
         try {
             list = obj.getJSONObject("rss").getJSONObject("channel").getJSONArray("item");
         } catch (JSONException e) {
@@ -120,6 +132,7 @@ public class main extends AppCompatActivity {
 
         ArrayList<String> stringArr = new ArrayList<>();
 
+        // Updates the layout widget list based on the global list of items.
         try {
             for (int i = 0; i < itemLimit; i++) {
                 String title = itemList.getJSONObject(i).getString("title");
@@ -135,6 +148,9 @@ public class main extends AppCompatActivity {
 
     private void addListenerOnItemList() {
         ListView list = findViewById(R.id.list);
+
+        // Opens a content page with information from the list of items.
+        // Shares title, description and link with content activity.
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -164,6 +180,7 @@ public class main extends AppCompatActivity {
 
 
     public void alert(String message) {
+        // Alert modal with custom message and "ok" button.
         AlertDialog.Builder builder1 = new AlertDialog.Builder(this);
         builder1.setMessage(message);
         builder1.setCancelable(true);
@@ -181,6 +198,7 @@ public class main extends AppCompatActivity {
 
 
     private boolean isMyServiceRunning() {
+        // Checks if the background service is running.
         ActivityManager manager = (ActivityManager) getSystemService(this.ACTIVITY_SERVICE);
         for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
             if (update.class.getName().equals(service.service.getClassName())) {
